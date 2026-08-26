@@ -123,6 +123,10 @@ export function createWhatsAppBot() {
 
   client.on('message', async (message) => {
     try {
+      // If messages are flowing, bot is definitely online
+      botState.status = 'ONLINE';
+      botState.qrCodeDataUrl = null;
+
       // If bot is paused by owner, ignore incoming messages
       if (!botState.isBotActive) {
         return;

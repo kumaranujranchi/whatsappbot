@@ -384,13 +384,16 @@ export function getDashboardHtml() {
           toggleBtn.innerHTML = '✅ Activate AI Auto-Reply';
         }
 
-        if (data.status === 'QR_READY' && data.qrCodeDataUrl) {
+        const hasActiveLogs = data.logs && data.logs.some(l => l.text.includes('Received message') || l.text.includes('Sent auto-reply') || l.text.includes('ONLINE'));
+        const isOnline = data.status === 'ONLINE' || data.status === 'AUTHENTICATED' || hasActiveLogs;
+
+        if (data.status === 'QR_READY' && data.qrCodeDataUrl && !hasActiveLogs) {
           dot.className = 'pulse-dot';
           text.innerText = 'WAITING FOR QR SCAN';
           qrSection.style.display = 'block';
           readySection.style.display = 'none';
           document.getElementById('qr-image').src = data.qrCodeDataUrl;
-        } else if (data.status === 'ONLINE' || data.status === 'AUTHENTICATED') {
+        } else if (isOnline) {
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
 
