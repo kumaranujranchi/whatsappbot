@@ -62,6 +62,11 @@ export function createWhatsAppBot() {
   });
 
   client.on('qr', async (qr) => {
+    // Ignore stray QR events if already authenticated or online
+    if (botState.status === 'ONLINE' || botState.status === 'AUTHENTICATED' || client.info) {
+      return;
+    }
+
     console.log('\n======================================================');
     console.log('📲 SCAN THIS QR CODE WITH YOUR WHATSAPP MOBILE APP:');
     console.log('======================================================\n');
@@ -78,7 +83,7 @@ export function createWhatsAppBot() {
 
   client.on('authenticated', () => {
     console.log('✅ WhatsApp Authentication successful!');
-    botState.status = 'AUTHENTICATED';
+    botState.status = 'ONLINE';
     botState.qrCodeDataUrl = null;
     addLog('✅ WhatsApp Authentication successful!');
   });

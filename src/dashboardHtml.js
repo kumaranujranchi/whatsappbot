@@ -360,6 +360,7 @@ export function getDashboardHtml() {
 
   <script>
     let isBotActive = true;
+    let hasConnectedBefore = false;
 
     async function fetchStatus() {
       try {
@@ -384,16 +385,11 @@ export function getDashboardHtml() {
           toggleBtn.innerHTML = '✅ Activate AI Auto-Reply';
         }
 
-        const hasActiveLogs = data.logs && data.logs.some(l => l.text.includes('Received message') || l.text.includes('Sent auto-reply') || l.text.includes('ONLINE'));
-        const isOnline = data.status === 'ONLINE' || data.status === 'AUTHENTICATED' || hasActiveLogs;
+        const hasActiveLogs = data.logs && data.logs.some(l => l.text.includes('Received message') || l.text.includes('Sent auto-reply') || l.text.includes('ONLINE') || l.text.includes('Authentication successful'));
+        const isOnline = data.status === 'ONLINE' || data.status === 'AUTHENTICATED' || hasActiveLogs || hasConnectedBefore;
 
-        if (data.status === 'QR_READY' && data.qrCodeDataUrl && !hasActiveLogs) {
-          dot.className = 'pulse-dot';
-          text.innerText = 'WAITING FOR QR SCAN';
-          qrSection.style.display = 'block';
-          readySection.style.display = 'none';
-          document.getElementById('qr-image').src = data.qrCodeDataUrl;
-        } else if (isOnline) {
+        if (isOnline) {
+          hasConnectedBefore = true;
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
 
