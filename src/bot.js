@@ -1,4 +1,11 @@
+import pkg from 'whatsapp-web.js';
+const { Client, LocalAuth } = pkg;
+import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
+import { generateAssistantReply } from './services/aiService.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const botState = {
   status: 'INITIALIZING',
@@ -58,7 +65,7 @@ export function createWhatsAppBot() {
     console.log('\n======================================================');
     console.log('📲 SCAN THIS QR CODE WITH YOUR WHATSAPP MOBILE APP:');
     console.log('======================================================\n');
-    qrcode.generate(qr, { small: true });
+    qrcodeTerminal.generate(qr, { small: true });
     
     botState.status = 'QR_READY';
     try {
