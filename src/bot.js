@@ -49,6 +49,7 @@ export function createWhatsAppBot() {
   });
 
   let botStartTime = Math.floor(Date.now() / 1000);
+  let isBotActive = true;
 
   client.on('ready', () => {
     botStartTime = Math.floor(Date.now() / 1000);
@@ -56,8 +57,32 @@ export function createWhatsAppBot() {
     console.log(`Listening for NEW incoming messages on behalf of ${process.env.OWNER_NAME || 'Owner'}...\n`);
   });
 
+  // Handle owner control commands sent from owner's phone
+  client.on('message_create', async (message) => {
+    if (!message.fromMe) return;
+
+    const command = message.body ? message.body.trim().toLowerCase() : '';
+
+    if (command === '!bot off' || command === '!off' || command === '!pause') {
+      isBotActive = false;
+      await message.reply('🛑 *JARVIS Remote Control*: Auto-reply PAUSED. Bot will no longer reply to incoming messages.');
+      console.log('🛑 Owner paused bot auto-reply.');
+    } else if (command === '!bot on' || command === '!on' || command === '!start') {
+      isBotActive = true;
+      await message.reply('✅ *JARVIS Remote Control*: Auto-reply ACTIVATED. Bot will now respond to incoming messages.');
+      console.log('✅ Owner activated bot auto-reply.');
+    } else if (command === '!bot status' || command === '!status') {
+      await message.reply(`🤖 *JARVIS Status*: ${isBotActive ? '✅ ACTIVE (Auto-reply is ON)' : '🛑 PAUSED (Auto-reply is OFF)'}`);
+    }
+  });
+
   client.on('message', async (message) => {
     try {
+      // If bot is paused by owner, ignore incoming messages
+      if (!isBotActive) {
+        return;
+      }
+
       // Ignore statuses, groups, broadcast messages
       if (message.isStatus || message.from.endsWith('@g.us') || message.from === 'status@broadcast') {
         return;
