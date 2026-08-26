@@ -311,7 +311,7 @@ export function getDashboardHtml() {
         <div id="qr-section" class="qr-container" style="display: none;">
           <img id="qr-image" class="qr-img" src="" alt="WhatsApp QR Code">
           <div class="qr-text">
-            📱 Open WhatsApp on your phone $\rightarrow$ <strong>Linked Devices</strong> $\rightarrow$ <strong>Link a Device</strong> and scan this code!
+            📱 Open WhatsApp on your phone → <strong>Linked Devices</strong> → <strong>Link a Device</strong> and scan this code!
           </div>
         </div>
 
