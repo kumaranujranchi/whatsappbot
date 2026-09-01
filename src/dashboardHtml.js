@@ -4,7 +4,7 @@ export function getDashboardHtml() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JARVIS WhatsApp AI Assistant Dashboard</title>
+  <title>Vastu Vihar WhatsApp AI Assistant Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -293,7 +293,7 @@ export function getDashboardHtml() {
       <div class="brand">
         <div class="brand-icon">🤖</div>
         <div>
-          <div class="brand-title">JARVIS Assistant Control Panel</div>
+          <div class="brand-title">Vastu Vihar AI Assistant Control Panel</div>
           <div class="brand-subtitle">Representing <strong id="owner-name">Owner</strong> on WhatsApp</div>
         </div>
       </div>

@@ -15,7 +15,7 @@ const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 
 export async function generateAssistantReply(senderId, senderName, incomingMessage) {
   if (!genAI) {
-    return `[Auto-Reply Assistant]: Namaste ${senderName}! Main ${OWNER_NAME} ka Personal Assistant hu. ${OWNER_NAME} abhi busy hain.`;
+    return `[Auto-Reply Assistant]: Namaste ${senderName}! Welcome to Vastu Vihar. Hum abhi aapka message receive kar chuke hain. Hamari team jald hi aap se contact karegi!`;
   }
 
   const now = Date.now();
@@ -71,8 +71,8 @@ export async function generateAssistantReply(senderId, senderName, incomingMessa
   } catch (error) {
     console.error('Error generating AI response:', error.message);
     if (session.isFirstMessage) {
-      return `Namaste ${senderName}! Main ${OWNER_NAME} ka Assistant hu. ${OWNER_NAME} abhi busy hain, aapka message receive ho gaya hai!`;
+      return `Namaste ${senderName}! Welcome to Vastu Vihar. Aapka message receive ho gaya hai, hamari team jald hi aap se sampark karegi.`;
     }
-    return `Aapka message receive ho gaya hai, main ${OWNER_NAME} ko inform kar dunga!`;
+    return `Aapka message receive ho gaya hai. Vastu Vihar team aapko jald update karegi.`;
   }
 }
