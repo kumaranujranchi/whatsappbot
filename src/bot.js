@@ -112,7 +112,7 @@ export function createWhatsAppBot() {
   let botStartTime = Math.floor(Date.now() / 1000) - 60;
 
   client.on('ready', () => {
-    botStartTime = Math.floor(Date.now() / 1000) - 30;
+    botStartTime = Math.floor(Date.now() / 1000) - 300; // 5 min buffer
     botState.status = 'ONLINE';
     botState.qrCodeDataUrl = null;
     console.log('\n🚀 WhatsApp Personal Assistant is ONLINE & READY!');
