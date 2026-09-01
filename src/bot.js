@@ -11,8 +11,8 @@ export const botState = {
   status: 'INITIALIZING',
   qrCodeDataUrl: null,
   isBotActive: true,
-  ownerName: process.env.OWNER_NAME || 'Anuj',
-  assistantName: process.env.ASSISTANT_NAME || 'JARVIS',
+  ownerName: process.env.OWNER_NAME || 'Vastu Vihar',
+  assistantName: process.env.ASSISTANT_NAME || 'Vastu Vihar Ai Assistance',
   logs: []
 };
 
@@ -121,16 +121,16 @@ export function createWhatsAppBot() {
 
     if (command === '!bot off' || command === '!off' || command === '!pause') {
       botState.isBotActive = false;
-      await message.reply('🛑 *JARVIS Remote Control*: Auto-reply PAUSED. Bot will no longer reply to incoming messages.');
+      await message.reply('🛑 *Vastu Vihar Remote Control*: Auto-reply PAUSED. Bot will no longer reply to incoming messages.');
       console.log('🛑 Owner paused bot auto-reply.');
       addLog('🛑 Owner paused bot auto-reply via WhatsApp.');
     } else if (command === '!bot on' || command === '!on' || command === '!start') {
       botState.isBotActive = true;
-      await message.reply('✅ *JARVIS Remote Control*: Auto-reply ACTIVATED. Bot will now respond to incoming messages.');
+      await message.reply('✅ *Vastu Vihar Remote Control*: Auto-reply ACTIVATED. Bot will now respond to incoming messages.');
       console.log('✅ Owner activated bot auto-reply.');
       addLog('✅ Owner activated bot auto-reply via WhatsApp.');
     } else if (command === '!bot status' || command === '!status') {
-      await message.reply(`🤖 *JARVIS Status*: ${botState.isBotActive ? '✅ ACTIVE (Auto-reply is ON)' : '🛑 PAUSED (Auto-reply is OFF)'}`);
+      await message.reply(`🤖 *Vastu Vihar Status*: ${botState.isBotActive ? '✅ ACTIVE (Auto-reply is ON)' : '🛑 PAUSED (Auto-reply is OFF)'}`);
     }
   });
 

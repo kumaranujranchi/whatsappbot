@@ -21,8 +21,8 @@ cd ~/Desktop/whatsapp-chatbot
 2. Open `.env` file in the project folder and paste your key:
    ```env
    GEMINI_API_KEY=AIzaSy...your_actual_key_here
-   OWNER_NAME=Anuj
-   ASSISTANT_NAME=JARVIS
+   OWNER_NAME=Vastu Vihar
+   ASSISTANT_NAME=Vastu Vihar Ai Assistance
    LANGUAGE=Hinglish
    ```
 
