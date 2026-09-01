@@ -36,9 +36,11 @@ export async function createWhatsAppBot() {
   addLog('🤖 Initializing WhatsApp Personal Assistant Client...');
 
   // Validate Upstash credentials
-  const hasUpstash = process.env.UPSTASH_REDIS_URL && process.env.UPSTASH_REDIS_TOKEN;
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_REDIS_TOKEN;
+  const hasUpstash = upstashUrl && upstashToken;
   if (!hasUpstash) {
-    console.warn('⚠️  UPSTASH_REDIS_URL or UPSTASH_REDIS_TOKEN not set. Session will NOT persist across restarts.');
+    console.warn('⚠️  UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set. Session will NOT persist across restarts.');
     addLog('⚠️  Upstash credentials missing — session will not persist.');
   } else {
     console.log('✅ Upstash Redis credentials found. Session will persist across restarts.');
