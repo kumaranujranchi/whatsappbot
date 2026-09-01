@@ -43,6 +43,7 @@ export function createWhatsAppBot() {
       remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018944885-alpha.html',
     },
     authTimeoutMs: 600000,
+    protocolTimeout: 120000, // 2 min — fixes ProtocolError on cloud servers
     puppeteer: {
       headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -53,13 +54,16 @@ export function createWhatsAppBot() {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
+        '--single-process',
         '--disable-gpu',
         '--disable-extensions',
         '--disable-component-extensions-with-background-pages',
         '--disable-default-apps',
         '--mute-audio',
         '--no-default-browser-check',
-        '--disable-background-networking'
+        '--disable-background-networking',
+        '--memory-pressure-off',
+        '--disable-features=TranslateUI'
       ]
     }
   });
