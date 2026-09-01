@@ -57,7 +57,8 @@ export async function createWhatsAppBot() {
     restartOnAuthFail: true,
     webVersionCache: {
       type: 'remote',
-      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
+      strict: false,
     },
     authTimeoutMs: 600000,
     protocolTimeout: 180000, // 3 min
@@ -73,8 +74,7 @@ export async function createWhatsAppBot() {
         '--disable-gpu',
         '--disable-extensions',
         '--mute-audio',
-        '--no-default-browser-check',
-        '--disable-web-security'
+        '--no-default-browser-check'
       ],
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
     }
@@ -143,6 +143,11 @@ export async function createWhatsAppBot() {
     botState.status = 'DISCONNECTED';
     botState.qrCodeDataUrl = null;
     addLog(`❌ WhatsApp Client Disconnected: ${reason}`);
+    // Auto re-initialize for clean QR generation
+    setTimeout(() => {
+      console.log('🔄 Re-initializing WhatsApp client after disconnect...');
+      client.initialize().catch(e => console.error('Re-init error:', e.message));
+    }, 5000);
   });
 
   // Handle owner control commands sent from owner's phone
