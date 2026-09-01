@@ -38,6 +38,10 @@ export function createWhatsAppBot() {
     authStrategy: new LocalAuth({
       dataPath: './.wwebjs_auth'
     }),
+    webVersionCache: {
+      type: 'remote',
+      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018944885-alpha.html',
+    },
     authTimeoutMs: 600000,
     puppeteer: {
       headless: true,
@@ -50,7 +54,6 @@ export function createWhatsAppBot() {
         '--no-first-run',
         '--no-zygote',
         '--disable-gpu',
-        '--single-process',
         '--disable-extensions',
         '--disable-component-extensions-with-background-pages',
         '--disable-default-apps',
@@ -59,6 +62,12 @@ export function createWhatsAppBot() {
         '--disable-background-networking'
       ]
     }
+  });
+
+  client.on('loading_screen', (percent, message) => {
+    console.log(`⏳ Loading WhatsApp Web (${percent}%): ${message}`);
+    botState.status = 'LOADING';
+    addLog(`⏳ Loading WhatsApp Web (${percent}%): ${message}`);
   });
 
   client.on('qr', async (qr) => {
@@ -85,7 +94,7 @@ export function createWhatsAppBot() {
     console.log('✅ WhatsApp Authentication successful!');
     botState.status = 'AUTHENTICATED';
     botState.qrCodeDataUrl = null;
-    addLog('✅ WhatsApp Authentication successful!');
+    addLog('✅ WhatsApp Authentication successful! Syncing session...');
   });
 
   client.on('auth_failure', (msg) => {
@@ -93,6 +102,11 @@ export function createWhatsAppBot() {
     botState.status = 'AUTH_FAILURE';
     botState.qrCodeDataUrl = null;
     addLog(`❌ WhatsApp Authentication failed: ${msg}`);
+  });
+
+  client.on('change_state', (state) => {
+    console.log('🔄 WhatsApp State Changed:', state);
+    addLog(`🔄 WhatsApp State Changed: ${state}`);
   });
 
   let botStartTime = Math.floor(Date.now() / 1000) - 60;
