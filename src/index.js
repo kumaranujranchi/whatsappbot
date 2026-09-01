@@ -34,11 +34,15 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Dashboard & Health Check HTTP server listening on 0.0.0.0:${PORT}`);
 });
 
-const bot = createWhatsAppBot();
-bot.initialize();
+createWhatsAppBot().then((bot) => {
+  bot.initialize();
 
-process.on('SIGINT', async () => {
-  console.log('\nShutting down WhatsApp Bot gracefully...');
-  await bot.destroy();
-  process.exit(0);
+  process.on('SIGINT', async () => {
+    console.log('\nShutting down WhatsApp Bot gracefully...');
+    await bot.destroy();
+    process.exit(0);
+  });
+}).catch((err) => {
+  console.error('❌ Failed to initialize bot:', err);
+  process.exit(1);
 });

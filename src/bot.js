@@ -1,8 +1,10 @@
 import pkg from 'whatsapp-web.js';
-const { Client, LocalAuth } = pkg;
+const { Client, RemoteAuth } = pkg;
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
 import { generateAssistantReply } from './services/aiService.js';
+import { MongoStore } from 'wwebjs-mongo';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -30,13 +32,33 @@ export function toggleBotActive() {
   return botState.isBotActive;
 }
 
-export function createWhatsAppBot() {
+export async function createWhatsAppBot() {
   console.log('🤖 Initializing WhatsApp Personal Assistant Client...');
   addLog('🤖 Initializing WhatsApp Personal Assistant Client...');
 
+  const mongoUri = process.env.MONGODB_URI;
+
+  // Connect to MongoDB for persistent session storage
+  let store = null;
+  if (mongoUri) {
+    try {
+      await mongoose.connect(mongoUri);
+      store = new MongoStore({ mongoose });
+      console.log('✅ MongoDB connected. Session will persist across restarts.');
+      addLog('✅ MongoDB connected — session persistent across restarts.');
+    } catch (err) {
+      console.error('❌ MongoDB connection failed:', err.message);
+      addLog(`❌ MongoDB connection failed: ${err.message}`);
+    }
+  } else {
+    console.warn('⚠️  MONGODB_URI not set. Session will NOT persist across restarts (QR scan needed each time).');
+    addLog('⚠️  MONGODB_URI missing — session will not persist.');
+  }
+
   const client = new Client({
-    authStrategy: new LocalAuth({
-      dataPath: process.env.AUTH_DATA_PATH || './.wwebjs_auth'
+    authStrategy: new RemoteAuth({
+      store: store,
+      backupSyncIntervalMs: 300000, // sync every 5 min
     }),
     webVersionCache: {
       type: 'remote',
@@ -84,7 +106,7 @@ export function createWhatsAppBot() {
     console.log('📲 SCAN THIS QR CODE WITH YOUR WHATSAPP MOBILE APP:');
     console.log('======================================================\n');
     qrcodeTerminal.generate(qr, { small: true });
-    
+
     botState.status = 'QR_READY';
     try {
       botState.qrCodeDataUrl = await QRCode.toDataURL(qr);
@@ -106,6 +128,11 @@ export function createWhatsAppBot() {
     botState.status = 'AUTH_FAILURE';
     botState.qrCodeDataUrl = null;
     addLog(`❌ WhatsApp Authentication failed: ${msg}`);
+  });
+
+  client.on('remote_session_saved', () => {
+    console.log('💾 WhatsApp session saved to MongoDB!');
+    addLog('💾 Session saved to MongoDB — restart pe QR scan nahi karna padega.');
   });
 
   client.on('change_state', (state) => {
@@ -139,16 +166,16 @@ export function createWhatsAppBot() {
 
     if (command === '!bot off' || command === '!off' || command === '!pause') {
       botState.isBotActive = false;
-      await message.reply('🛑 *Vastu Vihar Remote Control*: Auto-reply PAUSED. Bot will no longer reply to incoming messages.');
+      await message.reply('🛑 *Bot Remote Control*: Auto-reply PAUSED. Bot will no longer reply to incoming messages.');
       console.log('🛑 Owner paused bot auto-reply.');
       addLog('🛑 Owner paused bot auto-reply via WhatsApp.');
     } else if (command === '!bot on' || command === '!on' || command === '!start') {
       botState.isBotActive = true;
-      await message.reply('✅ *Vastu Vihar Remote Control*: Auto-reply ACTIVATED. Bot will now respond to incoming messages.');
+      await message.reply('✅ *Bot Remote Control*: Auto-reply ACTIVATED. Bot will now respond to incoming messages.');
       console.log('✅ Owner activated bot auto-reply.');
       addLog('✅ Owner activated bot auto-reply via WhatsApp.');
     } else if (command === '!bot status' || command === '!status') {
-      await message.reply(`🤖 *Vastu Vihar Status*: ${botState.isBotActive ? '✅ ACTIVE (Auto-reply is ON)' : '🛑 PAUSED (Auto-reply is OFF)'}`);
+      await message.reply(`🤖 *Bot Status*: ${botState.isBotActive ? '✅ ACTIVE (Auto-reply is ON)' : '🛑 PAUSED (Auto-reply is OFF)'}`);
     }
   });
 
