@@ -36,7 +36,7 @@ export function createWhatsAppBot() {
 
   const client = new Client({
     authStrategy: new LocalAuth({
-      dataPath: './.wwebjs_auth'
+      dataPath: process.env.AUTH_DATA_PATH || './.wwebjs_auth'
     }),
     webVersionCache: {
       type: 'remote',
