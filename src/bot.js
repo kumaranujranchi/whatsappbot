@@ -95,10 +95,10 @@ export function createWhatsAppBot() {
     addLog(`❌ WhatsApp Authentication failed: ${msg}`);
   });
 
-  let botStartTime = Math.floor(Date.now() / 1000);
+  let botStartTime = Math.floor(Date.now() / 1000) - 60;
 
   client.on('ready', () => {
-    botStartTime = Math.floor(Date.now() / 1000);
+    botStartTime = Math.floor(Date.now() / 1000) - 30;
     botState.status = 'ONLINE';
     botState.qrCodeDataUrl = null;
     console.log('\n🚀 WhatsApp Personal Assistant is ONLINE & READY!');
@@ -150,7 +150,7 @@ export function createWhatsAppBot() {
         return;
       }
 
-      // Ignore self messages
+      // Ignore self messages (messages sent from the connected phone)
       if (message.fromMe) {
         return;
       }

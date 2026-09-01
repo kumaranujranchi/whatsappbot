@@ -321,7 +321,7 @@ export function getDashboardHtml() {
         </div>
 
         <div id="ready-section" class="qr-container" style="display: block;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">✅</div>
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;" id="session-status-icon">✅</div>
           <div style="font-size: 1.1rem; font-weight: 600;" id="session-status-head">WhatsApp Account Connected</div>
           <div class="qr-text" id="session-status-sub">Bot is active and listening for incoming messages 24/7.</div>
         </div>
@@ -391,24 +391,36 @@ export function getDashboardHtml() {
           toggleBtn.innerHTML = '✅ Activate AI Auto-Reply';
         }
 
+        const statusIcon = document.getElementById('session-status-icon');
+
         if (data.status === 'QR_READY' && data.qrCodeDataUrl) {
           dot.className = 'pulse-dot qr-ready';
-          text.innerText = 'QR_READY';
+          text.innerText = 'SCAN_QR_CODE';
           qrSection.style.display = 'block';
           readySection.style.display = 'none';
           qrImage.src = data.qrCodeDataUrl;
-        } else if (data.status === 'ONLINE' || data.status === 'AUTHENTICATED') {
+        } else if (data.status === 'AUTHENTICATED') {
+          dot.className = 'pulse-dot qr-ready';
+          text.innerText = 'AUTHENTICATING...';
+          qrSection.style.display = 'none';
+          readySection.style.display = 'block';
+          if (statusIcon) statusIcon.innerText = '⏳';
+          document.getElementById('session-status-head').innerText = 'Authentication Successful!';
+          document.getElementById('session-status-sub').innerText = 'Syncing chats and initializing WhatsApp AI engine. Please wait a few seconds...';
+        } else if (data.status === 'ONLINE') {
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
 
           if (!data.isBotActive) {
             dot.className = 'pulse-dot paused';
             text.innerText = 'PAUSED';
+            if (statusIcon) statusIcon.innerText = '🛑';
             document.getElementById('session-status-head').innerText = 'AI Auto-Reply Paused';
             document.getElementById('session-status-sub').innerText = 'WhatsApp is connected, but auto-replying is paused by owner.';
           } else {
             dot.className = 'pulse-dot online';
             text.innerText = 'ONLINE & READY';
+            if (statusIcon) statusIcon.innerText = '✅';
             document.getElementById('session-status-head').innerText = 'WhatsApp Account Connected';
             document.getElementById('session-status-sub').innerText = 'Bot is active and listening for incoming messages 24/7.';
           }
@@ -417,13 +429,15 @@ export function getDashboardHtml() {
           text.innerText = data.status;
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
+          if (statusIcon) statusIcon.innerText = '❌';
           document.getElementById('session-status-head').innerText = 'WhatsApp Disconnected';
-          document.getElementById('session-status-sub').innerText = 'WhatsApp session disconnected. Scan new QR code when generated.';
+          document.getElementById('session-status-sub').innerText = 'WhatsApp session disconnected. A new QR code will appear above to scan.';
         } else {
           dot.className = 'pulse-dot';
           text.innerText = data.status || 'INITIALIZING';
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
+          if (statusIcon) statusIcon.innerText = '⚙️';
           document.getElementById('session-status-head').innerText = 'Initializing Client...';
           document.getElementById('session-status-sub').innerText = 'Connecting to WhatsApp network, please wait...';
         }
