@@ -55,11 +55,6 @@ export async function createWhatsAppBot() {
       backupSyncIntervalMs: 300000, // sync every 5 min
     }),
     restartOnAuthFail: true,
-    webVersionCache: {
-      type: 'remote',
-      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
-      strict: false,
-    },
     authTimeoutMs: 600000,
     protocolTimeout: 180000, // 3 min
     puppeteer: {
@@ -69,11 +64,7 @@ export async function createWhatsAppBot() {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
         '--no-first-run',
-        '--disable-gpu',
-        '--disable-extensions',
-        '--mute-audio',
         '--no-default-browser-check'
       ],
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
