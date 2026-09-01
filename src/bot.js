@@ -54,12 +54,8 @@ export async function createWhatsAppBot() {
       store: store,
       backupSyncIntervalMs: 300000, // sync every 5 min
     }),
-    webVersionCache: {
-      type: 'remote',
-      remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018944885-alpha.html',
-    },
     authTimeoutMs: 600000,
-    protocolTimeout: 120000, // 2 min — fixes ProtocolError on cloud servers
+    protocolTimeout: 180000, // 3 min
     puppeteer: {
       headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -69,18 +65,12 @@ export async function createWhatsAppBot() {
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
         '--disable-gpu',
         '--disable-extensions',
-        '--disable-component-extensions-with-background-pages',
-        '--disable-default-apps',
         '--mute-audio',
-        '--no-default-browser-check',
-        '--disable-background-networking',
-        '--memory-pressure-off',
-        '--disable-features=TranslateUI'
-      ]
+        '--no-default-browser-check'
+      ],
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
     }
   });
 

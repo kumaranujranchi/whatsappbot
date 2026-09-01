@@ -7,9 +7,12 @@ import fs from 'fs';
  */
 export class UpstashStore {
   constructor() {
+    const url = process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_URL;
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_REDIS_TOKEN;
+    
     this.redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL || process.env.UPSTASH_REDIS_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.UPSTASH_REDIS_TOKEN,
+      url,
+      token,
     });
     console.log('✅ UpstashStore initialized.');
   }
@@ -26,7 +29,12 @@ export class UpstashStore {
 
   async save(options) {
     try {
-      const fileData = fs.readFileSync(`${options.session}.zip`);
+      const zipPath = `${options.session}.zip`;
+      if (!fs.existsSync(zipPath)) {
+        console.warn(`UpstashStore: ${zipPath} does not exist yet to save.`);
+        return;
+      }
+      const fileData = fs.readFileSync(zipPath);
       const base64 = fileData.toString('base64');
       // Store with no expiry — session persists forever until deleted
       await this.redis.set(`whatsapp-session:${options.session}`, base64);
@@ -40,13 +48,15 @@ export class UpstashStore {
   async extract(options) {
     try {
       const base64 = await this.redis.get(`whatsapp-session:${options.session}`);
-      if (!base64) throw new Error('No session found in Upstash Redis.');
+      if (!base64) {
+        console.log('ℹ️ No existing session found in Upstash Redis.');
+        return;
+      }
       const buffer = Buffer.from(base64, 'base64');
-      fs.writeFileSync(`${options.path}/session.zip`, buffer);
-      console.log('📦 Session extracted from Upstash Redis.');
+      fs.writeFileSync(options.path, buffer);
+      console.log('📦 Session successfully extracted from Upstash Redis.');
     } catch (err) {
       console.error('UpstashStore extract error:', err.message);
-      throw err;
     }
   }
 
