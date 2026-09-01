@@ -55,8 +55,8 @@ export async function createWhatsAppBot() {
       backupSyncIntervalMs: 300000, // sync every 5 min
     }),
     restartOnAuthFail: true,
-    authTimeoutMs: 600000,
-    protocolTimeout: 180000, // 3 min
+    authTimeoutMs: 0, // No auth timeout
+    protocolTimeout: 300000, // 5 min
     puppeteer: {
       headless: true,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -65,9 +65,10 @@ export async function createWhatsAppBot() {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--no-first-run',
-        '--no-default-browser-check'
-      ],
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+        '--no-default-browser-check',
+        '--disable-blink-features=AutomationControlled',
+        '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+      ]
     }
   });
 
