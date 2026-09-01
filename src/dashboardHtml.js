@@ -111,7 +111,12 @@ export function getDashboardHtml() {
       box-shadow: 0 0 10px var(--success);
     }
 
-    .pulse-dot.paused {
+    .pulse-dot.qr-ready {
+      background-color: var(--warning);
+      box-shadow: 0 0 10px var(--warning);
+    }
+
+    .pulse-dot.paused, .pulse-dot.offline {
       background-color: var(--danger);
       box-shadow: 0 0 10px var(--danger);
       animation: none;
@@ -373,6 +378,7 @@ export function getDashboardHtml() {
         const text = document.getElementById('status-text');
         const qrSection = document.getElementById('qr-section');
         const readySection = document.getElementById('ready-section');
+        const qrImage = document.getElementById('qr-image');
         const toggleBtn = document.getElementById('toggle-btn');
 
         isBotActive = data.isBotActive;
@@ -385,11 +391,13 @@ export function getDashboardHtml() {
           toggleBtn.innerHTML = '✅ Activate AI Auto-Reply';
         }
 
-        const hasActiveLogs = data.logs && data.logs.some(l => l.text.includes('Received message') || l.text.includes('Sent auto-reply') || l.text.includes('ONLINE') || l.text.includes('Authentication successful'));
-        const isOnline = data.status === 'ONLINE' || data.status === 'AUTHENTICATED' || hasActiveLogs || hasConnectedBefore;
-
-        if (isOnline) {
-          hasConnectedBefore = true;
+        if (data.status === 'QR_READY' && data.qrCodeDataUrl) {
+          dot.className = 'pulse-dot qr-ready';
+          text.innerText = 'QR_READY';
+          qrSection.style.display = 'block';
+          readySection.style.display = 'none';
+          qrImage.src = data.qrCodeDataUrl;
+        } else if (data.status === 'ONLINE' || data.status === 'AUTHENTICATED') {
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
 
@@ -404,11 +412,20 @@ export function getDashboardHtml() {
             document.getElementById('session-status-head').innerText = 'WhatsApp Account Connected';
             document.getElementById('session-status-sub').innerText = 'Bot is active and listening for incoming messages 24/7.';
           }
+        } else if (data.status === 'DISCONNECTED' || data.status === 'AUTH_FAILURE') {
+          dot.className = 'pulse-dot offline';
+          text.innerText = data.status;
+          qrSection.style.display = 'none';
+          readySection.style.display = 'block';
+          document.getElementById('session-status-head').innerText = 'WhatsApp Disconnected';
+          document.getElementById('session-status-sub').innerText = 'WhatsApp session disconnected. Scan new QR code when generated.';
         } else {
           dot.className = 'pulse-dot';
           text.innerText = data.status || 'INITIALIZING';
           qrSection.style.display = 'none';
           readySection.style.display = 'block';
+          document.getElementById('session-status-head').innerText = 'Initializing Client...';
+          document.getElementById('session-status-sub').innerText = 'Connecting to WhatsApp network, please wait...';
         }
 
         // Update logs

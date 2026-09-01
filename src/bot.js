@@ -62,8 +62,8 @@ export function createWhatsAppBot() {
   });
 
   client.on('qr', async (qr) => {
-    // Ignore stray QR events if already authenticated or online
-    if (botState.status === 'ONLINE' || botState.status === 'AUTHENTICATED' || client.info) {
+    // Ignore stray QR events if client is already connected & ready
+    if (botState.status === 'ONLINE' && client.info) {
       return;
     }
 
@@ -78,12 +78,12 @@ export function createWhatsAppBot() {
     } catch (e) {
       console.error('Error generating QR Data URL:', e);
     }
-    addLog('📲 New QR Code generated. Scan with WhatsApp on phone!');
+    addLog('📲 New QR Code generated. Scan with WhatsApp on phone or Web Dashboard!');
   });
 
   client.on('authenticated', () => {
     console.log('✅ WhatsApp Authentication successful!');
-    botState.status = 'ONLINE';
+    botState.status = 'AUTHENTICATED';
     botState.qrCodeDataUrl = null;
     addLog('✅ WhatsApp Authentication successful!');
   });
@@ -91,6 +91,7 @@ export function createWhatsAppBot() {
   client.on('auth_failure', (msg) => {
     console.error('❌ WhatsApp Authentication failed:', msg);
     botState.status = 'AUTH_FAILURE';
+    botState.qrCodeDataUrl = null;
     addLog(`❌ WhatsApp Authentication failed: ${msg}`);
   });
 
@@ -103,6 +104,13 @@ export function createWhatsAppBot() {
     console.log('\n🚀 WhatsApp Personal Assistant is ONLINE & READY!');
     console.log(`Listening for NEW incoming messages on behalf of ${process.env.OWNER_NAME || 'Owner'}...\n`);
     addLog(`🚀 WhatsApp Personal Assistant is ONLINE & READY! Listening on behalf of ${botState.ownerName}.`);
+  });
+
+  client.on('disconnected', (reason) => {
+    console.log('❌ WhatsApp Client Disconnected:', reason);
+    botState.status = 'DISCONNECTED';
+    botState.qrCodeDataUrl = null;
+    addLog(`❌ WhatsApp Client Disconnected: ${reason}`);
   });
 
   // Handle owner control commands sent from owner's phone
