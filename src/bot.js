@@ -3,8 +3,7 @@ const { Client, RemoteAuth } = pkg;
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
 import { generateAssistantReply } from './services/aiService.js';
-import { MongoStore } from 'wwebjs-mongo';
-import mongoose from 'mongoose';
+import { UpstashStore } from './services/upstashStore.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -36,24 +35,17 @@ export async function createWhatsAppBot() {
   console.log('🤖 Initializing WhatsApp Personal Assistant Client...');
   addLog('🤖 Initializing WhatsApp Personal Assistant Client...');
 
-  const mongoUri = process.env.MONGODB_URI;
-
-  // Connect to MongoDB for persistent session storage
-  let store = null;
-  if (mongoUri) {
-    try {
-      await mongoose.connect(mongoUri);
-      store = new MongoStore({ mongoose });
-      console.log('✅ MongoDB connected. Session will persist across restarts.');
-      addLog('✅ MongoDB connected — session persistent across restarts.');
-    } catch (err) {
-      console.error('❌ MongoDB connection failed:', err.message);
-      addLog(`❌ MongoDB connection failed: ${err.message}`);
-    }
+  // Validate Upstash credentials
+  const hasUpstash = process.env.UPSTASH_REDIS_URL && process.env.UPSTASH_REDIS_TOKEN;
+  if (!hasUpstash) {
+    console.warn('⚠️  UPSTASH_REDIS_URL or UPSTASH_REDIS_TOKEN not set. Session will NOT persist across restarts.');
+    addLog('⚠️  Upstash credentials missing — session will not persist.');
   } else {
-    console.warn('⚠️  MONGODB_URI not set. Session will NOT persist across restarts (QR scan needed each time).');
-    addLog('⚠️  MONGODB_URI missing — session will not persist.');
+    console.log('✅ Upstash Redis credentials found. Session will persist across restarts.');
+    addLog('✅ Upstash Redis connected — session persistent across restarts.');
   }
+
+  const store = hasUpstash ? new UpstashStore() : null;
 
   const client = new Client({
     authStrategy: new RemoteAuth({
@@ -97,10 +89,7 @@ export async function createWhatsAppBot() {
   });
 
   client.on('qr', async (qr) => {
-    // Ignore stray QR events if client is already connected & ready
-    if (botState.status === 'ONLINE' && client.info) {
-      return;
-    }
+    if (botState.status === 'ONLINE' && client.info) return;
 
     console.log('\n======================================================');
     console.log('📲 SCAN THIS QR CODE WITH YOUR WHATSAPP MOBILE APP:');
@@ -131,8 +120,8 @@ export async function createWhatsAppBot() {
   });
 
   client.on('remote_session_saved', () => {
-    console.log('💾 WhatsApp session saved to MongoDB!');
-    addLog('💾 Session saved to MongoDB — restart pe QR scan nahi karna padega.');
+    console.log('💾 WhatsApp session saved to Upstash Redis!');
+    addLog('💾 Session saved to Upstash — restart pe QR scan nahi karna padega.');
   });
 
   client.on('change_state', (state) => {
@@ -181,35 +170,21 @@ export async function createWhatsAppBot() {
 
   client.on('message', async (message) => {
     try {
-      // If messages are flowing, bot is definitely online
       botState.status = 'ONLINE';
       botState.qrCodeDataUrl = null;
 
-      // If bot is paused by owner, ignore incoming messages
-      if (!botState.isBotActive) {
-        return;
-      }
+      if (!botState.isBotActive) return;
 
-      // Ignore statuses, groups, broadcast messages
-      if (message.isStatus || message.from.endsWith('@g.us') || message.from === 'status@broadcast') {
-        return;
-      }
+      if (message.isStatus || message.from.endsWith('@g.us') || message.from === 'status@broadcast') return;
 
-      // Ignore self messages (messages sent from the connected phone)
-      if (message.fromMe) {
-        return;
-      }
+      if (message.fromMe) return;
 
-      // Ignore old messages sent before bot started running
       if (message.timestamp && message.timestamp < botStartTime) {
         console.log(`⏳ Ignoring past message from ${message.from} (sent before bot startup).`);
         return;
       }
 
-      // Ignore empty messages
-      if (!message.body || !message.body.trim()) {
-        return;
-      }
+      if (!message.body || !message.body.trim()) return;
 
       const contact = await message.getContact();
       const senderName = contact.pushname || contact.name || 'Friend';
